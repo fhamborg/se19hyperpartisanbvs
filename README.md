@@ -16,6 +16,18 @@ https://www.tira.io/task/hyperpartisan-news-detection/dataset/pan19-hyperpartisa
 If you wish to see the code as it was prepared for the SemEval 2019 task, then refer to the `semval-2019` tag in the git repo.
 
 ## Preparation / Requirements
+```
+conda create --yes -n semevalhyperpart python=3.6
+conda activate semevalhyperpart
+pip install gensim==3.4.0
+pip install tensorflow==1.12.0
+pip install Keras==2.2.4
+pip install nltk==3.4.1
+conda install pytorch=0.4.1 -c pytorch
+pip install spacy==2.0.16
+pip install scikit-learn==0.20.0
+pip install allennlp==0.4.3 # added myself, is also from roughly March 2018 from which the other PyPI package versions are, too
+```
 
 * Python 3.6 (Anaconda will work best)
 * Gensim version 3.4.0
