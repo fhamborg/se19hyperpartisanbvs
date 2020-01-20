@@ -16,13 +16,31 @@ pip install allennlp==0.4.3 # added myself, is also from roughly March 2018 from
 ```
 
 ## Training
+* Convert the XML file into a tsv file with one article per line:
+  * `python Preprocessing/xml2line.py -A data/articles-training-byarticle-20181122.xml -T data/ground-truth-training-byarticle-20181122.xml -F article_sent,title_sent work/train.text.tsv`
+* Convert the tsv file containing text into a tsv file containing elmo embeddings:
+  * If you have a GPU: `python Preprocessing/line2elmo2.py -g -l 100  work/train.text.tsv work/train.elmo.tsv`
+  * Otherwise: `python Preprocessing/line2elmo2.py -l 100 work/train.text.tsv work/train.elmo.tsv`
+  If you get problems with the GPU memory or RAM, use the `-b option to reduce the batch size
+* Make sure the directory `saved_models` does not contain any model files from previous runs:
+  * `rm saved_models/*.hdf5`
+* Train the actual model: 
+  `KERAS_BACKEND=tensorflow python CNN_elmo.py work/train.elmo.tsv`
+  This will create a number of model files in the `saved_models` directory. The file names contain the validation accuracy.
 
-## Run it
+## Infer
+To infer on our own files, follow the following steps (in this example using a `mytest.jsonl). See bottom of readme.md for inferring on original semeval files. 
 
+* Convert the JSONL to tsv:
+  `python Preprocessing/jsonl2line.py -A data/mytest.jsonl -F article_sent,title_sent work/mytest.text.tsv`
+* Convert the text to elmo embeddings:
+  * If you have a GPU: `python Preprocessing/line2elmo2.py -g -l 100  work/mytest.text.tsv work/mytest.elmo.tsv`
+  * Otherwise: `python Preprocessing/line2elmo2.py -l 100 work/mytest.text.tsv work/mytest.elmo.tsv`
+* Run the actual application of the model ensemble
+  * `./ensemble_pred.sh work/mytest.elmo.tsv work/mytest.preds.txt` 
 
 
 ## Original readme.md
-
 This is the code for the [SemEval 2019 Task 4, Hyperpartisan News Detection](https://pan.webis.de/semeval19/semeval19-web/)
 submitted by team `Bertha von Suttner`:
 * [Ye Jiang](https://ye-jiang.github.io/)
@@ -39,19 +57,6 @@ https://www.tira.io/task/hyperpartisan-news-detection/dataset/pan19-hyperpartisa
 If you wish to see the code as it was prepared for the SemEval 2019 task, then refer to the `semval-2019` tag in the git repo.
 
 ## Preparation / Requirements
-```
-conda create --yes -n semevalhyperpart python=3.6
-conda activate semevalhyperpart
-pip install gensim==3.4.0
-pip install tensorflow==1.12.0
-pip install Keras==2.2.4
-pip install nltk==3.4.1
-conda install pytorch=0.4.1 -c pytorch
-pip install spacy==2.0.16
-pip install scikit-learn==0.20.0
-pip install allennlp==0.4.3 # added myself, is also from roughly March 2018 from which the other PyPI package versions are, too
-```
-
 * Python 3.6 (Anaconda will work best)
 * Gensim version 3.4.0
 * Tensorflow version 1.12.0
