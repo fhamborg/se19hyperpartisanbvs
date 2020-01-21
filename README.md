@@ -1,5 +1,5 @@
 # SemEval2019/Task4 Team Bertha-von-Suttner submission
-You can skip the training by using the pretrained model ensemble that I uploaded as a release. Simply extract the files into `saved_models`.
+You can skip the training by using the pretrained model ensemble that is already contained in `saved_models`.
 
 ## Setup
 ```
@@ -9,11 +9,23 @@ pip install gensim==3.4.0
 pip install tensorflow==1.12.0
 pip install Keras==2.2.4
 pip install nltk==3.4.1
-conda install pytorch=0.4.1 -c pytorch
+conda install pytorch=0.3.1 -c pytorch # this is what i had in the documentation, but it doesnt match with allennlp's reqs: conda install pytorch=0.4.1 -c pytorch
 pip install spacy==2.0.16
 pip install scikit-learn==0.20.0
 pip install allennlp==0.4.3 # added myself, is also from roughly March 2018 from which the other PyPI package versions are, too
+python -m spacy download en_core_web_sm
+python -m nltk.downloader stopwords
+mkdir elmo
+cd elmo
+wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5
+wget https://s3-us-west-2.amazonaws.com/allennlp/models/elmo/2x4096_512_2048cnn_2xhighway/elmo_2x4096_512_2048cnn_2xhighway_options.json
 ```
+
+Optional, because this repo contains a model ensemble in `saved_models` trained on the following two files. If you
+want to train yourself, create a directory `data` and save the by-article training files into it:
+  * articles-training-byarticle-20181122.xml
+  * ground-truth-training-byarticle-20181122.xml 
+
 
 ## Training
 * Convert the XML file into a tsv file with one article per line:

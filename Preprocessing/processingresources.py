@@ -2,6 +2,14 @@
 Classes representing "processing resources"
 """
 
+import os
+import sys
+
+cur_path = os.path.dirname(os.path.realpath(__file__))
+par_path = os.path.dirname(cur_path)
+sys.path.append(cur_path)
+sys.path.append(par_path)
+
 import preprocessing
 import xml.etree.ElementTree
 
@@ -10,7 +18,6 @@ import features
 import json
 from numbers import Number
 import htmlparser
-import sys
 
 
 class PrArticle2Line:

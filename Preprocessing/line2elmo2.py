@@ -32,18 +32,27 @@ default_m = "original"
 
 
 class Line2ElmoConverter:
-    def __init__(self, config: str = os.path.join("elmo", configs[default_m]),
-                 model: str = os.path.join("elmo", models[default_m]), use_gpu: bool = False):
+    def __init__(self, config_filename: str = configs[default_m],
+                 model_filename: str = models[default_m], use_gpu: bool = False, concat: bool = False,
+                 modelpath: str = './elmo/', maxtoks: int = 200, maxsents: int = 200, batchsize: int = 50):
+
+        config_filepath = os.path.join(modelpath, config_filename)
+        model_filepath = os.path.join(modelpath, model_filename)
+
         if use_gpu:
             device = 0
         else:
             device = -1
-        self.elmo = ElmoEmbedder(options_file=config, weight_file=model, cuda_device=device)
+        self.elmo = ElmoEmbedder(options_file=config_filepath, weight_file=model_filepath, cuda_device=device)
+        self.concat = concat
+        self.maxtoks = maxtoks
+        self.maxsents = maxsents
+        self.batchsize = batchsize
 
     def convertline2elmo(self, row_id: str, sents: list, field1: str = 'None', field2: str = 'None',
                          field3: str = 'None'):
         """
-
+        Convert some text split into its sentences sent into elmo-based representation required for the classifier.
         :param row_id:
         :param sents: If you want to pass the article's title, this must be the first item in sents.
         :param field1: not used
@@ -51,22 +60,24 @@ class Line2ElmoConverter:
         :param field3: not used
         :return:
         """
+        sents = sents[:self.maxsents]
+
         outs = []
         # unlike the tensorflow version we can have dynamic batch sizes here!
-        for batchnr in range(math.ceil(len(sents) / batchsize)):
-            fromidx = batchnr * batchsize
-            toidx = (batchnr + 1) * batchsize
+        for batchnr in range(math.ceil(len(sents) / self.batchsize)):
+            fromidx = batchnr * self.batchsize
+            toidx = (batchnr + 1) * self.batchsize
             actualtoidx = min(len(sents), toidx)
             # print("Batch: from=",fromidx,"toidx=",toidx,"actualtoidx=",actualtoidx)
             sentsbatch = sents[fromidx:actualtoidx]
-            sentsbatch = [s.split()[:maxtoks] for s in sentsbatch]
+            sentsbatch = [s.split()[:self.maxtoks] for s in sentsbatch]
             for s in sentsbatch:
                 if len(s) == 0:
                     s.append("")  # otherwise we get a shape (3,0,dims) result
             ret = list(self.elmo.embed_sentences(sentsbatch))
             # the ret is the original representation of three vectors per word
             # We first combine per word through concatenation or average, then average
-            if concat:
+            if self.concat:
                 ret = [np.concatenate(x, axis=1) for x in ret]
             else:
                 ret = [np.average(x, axis=1) for x in ret]
